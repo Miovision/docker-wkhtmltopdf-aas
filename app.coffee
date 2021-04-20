@@ -30,7 +30,7 @@ app.use status()
 app.use prometheusMetrics()
 app.use log('combined')
 
-app.post '/', bodyParser.json(limit: payload_limit), ({body}, res) ->
+app.post '/', bodyParser.json(limit: payload_limit), (req, res) ->
 
   decode = (base64) ->
     Buffer.from(base64, 'base64').toString 'utf8' if base64?
@@ -41,24 +41,37 @@ app.post '/', bodyParser.json(limit: payload_limit), ({body}, res) ->
   tmpWrite = (content) ->
     tmpFile('html').then (f) -> fileWrite f, content if content?
 
+  if process.env.LOGGING_LEVEL == 'verbose'
+    console.log("Content-Type:" + req.get('Content-Type'))
+    console.log(JSON.stringify(req.body))
+
   # compile options to arguments
   arg = flow(toPairs, flatMap((i) -> ['--' + first(i), last(i)]), compact)
 
   parallel.join tmpFile('pdf'),
-  map(flow(decode, tmpWrite), [body.header, body.footer, body.contents])...,
+  map(flow(decode, tmpWrite), [req.body.header, req.body.footer, req.body.contents])...,
   (output, header, footer, content) ->
     files = [['--header-html', header],
              ['--footer-html', footer],
              [content, output]]
     # combine arguments and call pdf compiler using shell
     # injection save function 'spawn' goo.gl/zspCaC
-    spawn 'wkhtmltopdf', (arg(body.options)
+    ls = spawn 'wkhtmltopdf', (arg(req.body.options)
     .concat(flow(remove(negate(last)), flatten)(files)))
     .then ->
       res.setHeader 'Content-type', 'application/pdf'
       promisePipe fs.createReadStream(output), res
-    .catch -> res.status(BAD_REQUEST = 400).send 'invalid arguments'
+    .catch (error) -> 
+      console.error error
+      res.status(BAD_REQUEST = 400).send 'invalid arguments'
     .then -> map fs.unlinkSync, compact([output, header, footer, content])
+
+    if process.env.LOGGING_LEVEL == 'info' || process.env.LOGGING_LEVEL == 'verbose'
+      ls.childProcess.stderr.on 'data', (data) -> console.log data.toString().trim()
+      ls.childProcess.stdout.on 'data', (data) -> console.log data.toString().trim()
+    if process.env.LOGGING_LEVEL == 'verbose'
+      ls.childProcess.on 'exit', (code) -> console.log 'child process exited with code ' + code.toString()
+
 
 app.listen process.env.PORT or 5555
 module.exports = app

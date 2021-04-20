@@ -1,4 +1,32 @@
 # docker-wkhtmltopdf-aas
+ Forked and converted to Private Miovision repository in order to upgrade libraries beyond the original repo which is no longer well maintained. 
+
+## Build and Deploy for DataLink
+A build script has been created to deploy to Miovision ECR. 
+Requirements 
+- AWSCLI configuration as per https://github.com/Miovision/datalink
+- dev profile for access to DATALINK_DEV-Developer role 
+
+Options:
+- add ```push``` to push to ECR  
+
+To create a build image but not push:
+```bash
+/docker-wkhtmltopdf-aas $ ./build.sh 
+```
+
+To create a build image AND push:
+```bash
+/docker-wkhtmltopdf-aas $ ./build.sh push
+```
+
+## Add additional logging
+- Verbose logginig enabled by setting  ```LOGGING_LEVEL``` environment variable to deployment
+    - ```LOGGING_LEVEL=info``` Log wkhtmltopdf child process to stdout and stderr
+    - ```LOGGING_LEVEL=verbose``` Log request details in addition to info level logging to stdout and stderr
+
+
+## Origin repo status
 [![License (3-Clause BSD)](https://img.shields.io/badge/license-BSD%203--Clause-brightgreen.svg)](http://opensource.org/licenses/BSD-3-Clause)
 [![Build Status](https://travis-ci.org/traum-ferienwohnungen/docker-wkhtmltopdf-aas.svg?branch=master)](https://travis-ci.org/traum-ferienwohnungen/docker-wkhtmltopdf-aas)
 [![Issue Count](https://codeclimate.com/github/traum-ferienwohnungen/docker-wkhtmltopdf-aas/badges/issue_count.svg)](https://codeclimate.com/github/traum-ferienwohnungen/docker-wkhtmltopdf-aas)
@@ -155,7 +183,7 @@ The development of the container takes place on
 
 ### Pull Requests
 
-- fork the repository
+- Create branch 
 - make changes
 - if required, write tests covering the new functionality
 - ensure all tests pass and 100% code coverage is achieved (run `yarn test`)
