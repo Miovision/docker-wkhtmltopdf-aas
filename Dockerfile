@@ -4,7 +4,7 @@ RUN apt-get update &&                          \
     apt-get install -y --no-install-recommends \
     add-apt-key                                \
     fontconfig                                 \
-    curl				                       \
+    curl                                       \
     libcurl4                                   \
     libcurl3-gnutls                            \
     libfontconfig1                             \
