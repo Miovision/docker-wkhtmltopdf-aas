@@ -48,6 +48,15 @@ app.post '/', bodyParser.json(limit: payload_limit), (req, res) ->
   # compile options to arguments
   arg = flow(toPairs, flatMap((i) -> ['--' + first(i), last(i)]), compact)
 
+  # if not logging, then we need to send all output from wkhtmltopdf to /dev/null
+  # instead of the default piped streams otherwise nothing will consume the streams
+  # and their buffers will fill and cause the generation to fail on large jobs where the pdf may
+  # be hundreds of pages long
+  logging_output = 'ignore'
+  if process.env.LOGGING_LEVEL == 'info' || process.env.LOGGING_LEVEL == 'verbose'
+    logging_output = 'pipe'
+
+
   parallel.join tmpFile('pdf'),
   map(flow(decode, tmpWrite), [req.body.header, req.body.footer, req.body.contents])...,
   (output, header, footer, content) ->
@@ -57,7 +66,7 @@ app.post '/', bodyParser.json(limit: payload_limit), (req, res) ->
     # combine arguments and call pdf compiler using shell
     # injection save function 'spawn' goo.gl/zspCaC
     ls = spawn 'wkhtmltopdf', (arg(req.body.options)
-    .concat(flow(remove(negate(last)), flatten)(files)))
+    .concat(flow(remove(negate(last)), flatten)(files))), {stdio: logging_output}
     .then ->
       res.setHeader 'Content-type', 'application/pdf'
       promisePipe fs.createReadStream(output), res
