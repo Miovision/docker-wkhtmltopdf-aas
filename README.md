@@ -153,7 +153,7 @@ The development of the container takes place on
 
 ### Pull Requests
 
-- Create fork 
+- fork the repository
 - make changes
 - if required, write tests covering the new functionality
 - ensure all tests pass and 100% code coverage is achieved (run `yarn test`)
