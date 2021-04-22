@@ -56,7 +56,6 @@ app.post '/', bodyParser.json(limit: payload_limit), (req, res) ->
   if process.env.LOGGING_LEVEL == 'info' || process.env.LOGGING_LEVEL == 'verbose'
     logging_output = 'pipe'
 
-
   parallel.join tmpFile('pdf'),
   map(flow(decode, tmpWrite), [req.body.header, req.body.footer, req.body.contents])...,
   (output, header, footer, content) ->

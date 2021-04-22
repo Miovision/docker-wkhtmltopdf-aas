@@ -1,40 +1,4 @@
 # docker-wkhtmltopdf-aas
- Forked and converted to Private Miovision repository in order to upgrade libraries beyond the original repo which is no longer well maintained. 
-
-## Build and Deploy for DataLink
-A build script has been created to deploy to Miovision ECR. 
-Requirements 
-- AWSCLI configuration as per https://github.com/Miovision/datalink
-- dev profile for access to DATALINK_DEV-Developer role 
-
-Options:
-- add ```push``` to push to ECR  
-
-To create a build image but not push:
-```bash
-/docker-wkhtmltopdf-aas $ ./build.sh 
-```
-
-To create a build image AND push:
-```bash
-/docker-wkhtmltopdf-aas $ ./build.sh push
-```
-
-## Add additional logging
-- Verbose logginig enabled by setting  ```LOGGING_LEVEL``` environment variable to deployment
-    - ```LOGGING_LEVEL=info``` Log wkhtmltopdf child process to stdout and stderr
-    - ```LOGGING_LEVEL=verbose``` Log request details in addition to info level logging to stdout and stderr
-
-
-## Origin repo status
-[![License (3-Clause BSD)](https://img.shields.io/badge/license-BSD%203--Clause-brightgreen.svg)](http://opensource.org/licenses/BSD-3-Clause)
-[![Build Status](https://travis-ci.org/traum-ferienwohnungen/docker-wkhtmltopdf-aas.svg?branch=master)](https://travis-ci.org/traum-ferienwohnungen/docker-wkhtmltopdf-aas)
-[![Issue Count](https://codeclimate.com/github/traum-ferienwohnungen/docker-wkhtmltopdf-aas/badges/issue_count.svg)](https://codeclimate.com/github/traum-ferienwohnungen/docker-wkhtmltopdf-aas)
-[![Test Coverage](https://codeclimate.com/github/traum-ferienwohnungen/docker-wkhtmltopdf-aas/badges/coverage.svg)](https://codeclimate.com/github/traum-ferienwohnungen/docker-wkhtmltopdf-aas/coverage)
-[![dependencies Status](https://david-dm.org/traum-ferienwohnungen/docker-wkhtmltopdf-aas/status.svg)](https://david-dm.org/traum-ferienwohnungen/docker-wkhtmltopdf-aas)
-[![](https://images.microbadger.com/badges/image/traumfewo/docker-wkhtmltopdf-aas.svg)](http://microbadger.com/images/traumfewo/docker-wkhtmltopdf-aas)
-[![Known Vulnerabilities](https://snyk.io/test/github/traum-ferienwohnungen/docker-wkhtmltopdf-aas/badge.svg)](https://snyk.io/test/github/traum-ferienwohnungen/docker-wkhtmltopdf-aas)
-
 wkhtmltopdf in a docker container as a rest api web service.
 
 ## Live demo
@@ -109,6 +73,12 @@ echo curl_exec($ch);
 #### Payload Size
 
 It might be useful to increase the payload size to allow the generation of larger PDF files in case of errors such as `Error: request entity too large`. You can configure the payload size limit for the body parser by adding the additional `PAYLOAD_LIMIT` environment variable to the `docker run -t ` start command. For instance, set the payload limit to 80 megabyte by adding ` -e PAYLOAD_LIMIT='80mb'`. Please consider that a high payload limit might result in high server resource usage and longer response times.
+
+### Logging
+- Verbose logginig enabled by setting  ```LOGGING_LEVEL``` environment variable 
+    - ```LOGGING_LEVEL=info``` Log wkhtmltopdf child process to stdout and stderr
+    - ```LOGGING_LEVEL=verbose``` Log request details in addition to info level logging to stdout and stderr
+
 ## Features
 
 The containing features are easy to disable in case you don't need them. <br> For example disable prometheus metrics:
@@ -183,7 +153,7 @@ The development of the container takes place on
 
 ### Pull Requests
 
-- Create branch 
+- Create fork 
 - make changes
 - if required, write tests covering the new functionality
 - ensure all tests pass and 100% code coverage is achieved (run `yarn test`)
