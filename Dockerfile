@@ -1,45 +1,61 @@
-FROM ubuntu:20.04 
+FROM ubuntu:18.04
 
 RUN apt-get update &&                          \
     apt-get install -y --no-install-recommends \
-    add-apt-key                                \
     fontconfig                                 \
-    curl                                       \
-    libcurl4                                   \
+    libcurl3                                   \
     libcurl3-gnutls                            \
     libfontconfig1                             \
     libfreetype6                               \
     libjpeg-turbo8                             \
-    libpng-dev                                 \
     libx11-6                                   \
     libxext6                                   \
     libxrender1                                \
+    nodejs                                     \
+    npm                                        \
     software-properties-common                 \
     wget                                       \
     xfonts-75dpi                               \
-    xfonts-base  			                   \
-    python
+    xfonts-base
 
-ENV WK_URL=https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1 \
-    WK_PKG=wkhtmltox_0.12.6-1.focal_amd64.deb
+ENV WK_URL=https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.2.1
+ENV WK_PKG=wkhtmltox-0.12.2.1_linux-trusty-amd64.deb
 
-COPY swagger.yaml package.json app.coffee /
+ENV LPNG_URL=http://se.archive.ubuntu.com/ubuntu/pool/main/libp/libpng
+ENV LPNG_PKG=libpng12-0_1.2.54-1ubuntu1_amd64.deb
 
-RUN curl -sL https://deb.nodesource.com/setup_14.x                     \
-    -o /tmp/nodesource_setup.sh && bash /tmp/nodesource_setup.sh    && \
-    rm /tmp/nodesource_setup.sh                                     && \
-    apt-get install -y --no-install-recommends nodejs               && \
-    wget -q $WK_URL/$WK_PKG && dpkg -i $WK_PKG && rm $WK_PKG        && \
-    rm /usr/local/bin/wkhtmltoimage                                 && \
-    npm install -g coffeescript forever bootprint bootprint-openapi && \
-    bootprint openapi swagger.yaml documentation                    && \
-    npm uninstall -g bootprint bootprint-openapi
+RUN wget -q $WK_URL/$WK_PKG     && \
+    wget -q $LPNG_URL/$LPNG_PKG && \
+    dpkg -i $LPNG_PKG           && \
+    dpkg -i $WK_PKG             && \
+    rm /usr/local/bin/wkhtmltoimage
+
+RUN npm install -g          \
+    yarn                    \
+    coffee-script           \
+    forever bootprint@1.0.2 \
+    bootprint-openapi@1.1.1
+
+# generate documentation from swagger
+COPY swagger.yaml /
+
+RUN bootprint openapi swagger.yaml documentation && \
+    npm uninstall -g                                \
+    bootprint                                       \
+    bootprint-openapi
+
+# install npm dependencies
+COPY package.json /
+
+RUN yarn install --ignore-engines
+
+COPY app.coffee /
+
+EXPOSE 5555
 
 RUN npm update       && \
     node   --version && \
     npm    --version && \
     coffee --version
-
-EXPOSE 5555
 
 CMD ["npm", "start"]
